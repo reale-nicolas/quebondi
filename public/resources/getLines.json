@@ -1,0 +1,183 @@
+{
+    "method": "getLines",
+    "date": "21/06/2017",
+    "lines":
+    [ 
+        {
+            "name": "1",
+            "ramals": 
+            [
+                {
+                    "name": "A",
+                    "imageurl": "",
+                    "zone": "",
+                    "stop": 
+                    [
+                        
+                    ]
+                },{
+                    "name": "B",
+                    "imageurl": "",
+                    "zone": "",
+                    "stop": {
+
+                    }
+                }
+            ]
+        },
+
+        {
+            "name": "2",
+            "ramals": 
+            [
+                {
+                   "name": "A",
+                    "imageurl": "",
+                    "zone": "",
+                    "stop": {
+
+                    }
+                },{
+                   "name": "B",
+                    "imageurl": "",
+                    "zone": "",
+                    "stop": {
+
+                    }
+                }
+            ]
+        },
+
+        {
+            "name": "3",
+            "ramals": 
+            [
+                {
+                   "name": "A",
+                    "imageurl": "",
+                    "zone": "",
+                    "stop": {
+
+                    }
+                },{
+                   "name": "B",
+                    "imageurl": "",
+                    "zone": "",
+                    "stop": {
+
+                    }
+                }
+            ]
+        },
+
+        {
+            "name": "4",
+            "ramals": 
+            [
+                {
+                   "name": "A",
+                    "imageurl": "",
+                    "zone": "",
+                    "stop": {
+
+                    }
+                },{
+                   "name": "B",
+                    "imageurl": "",
+                    "zone": "",
+                    "stop": {
+
+                    }
+                }
+            ]
+        },
+
+        {
+            "name": "5",
+            "ramals": 
+            [
+                {
+                   "name": "A",
+                    "imageurl": "",
+                    "zone": "",
+                    "stop": {
+
+                    }
+                },{
+                   "name": "B",
+                    "imageurl": "",
+                    "zone": "",
+                    "stop": {
+
+                    }
+                }
+            ]
+        },
+
+        {
+            "name": "6",
+            "ramals": 
+            [
+                {
+                   "name": "A",
+                    "imageurl": "",
+                    "zone": "",
+                    "stop": {
+
+                    }
+                },{
+                   "name": "B",
+                    "imageurl": "",
+                    "zone": "",
+                    "stop": {
+
+                    }
+                }
+            ]
+        },
+
+        {
+            "name": "7",
+            "ramals": 
+            [
+                {
+                   "name": "A",
+                    "imageurl": "",
+                    "zone": "",
+                    "stop": {
+
+                    }
+                },{
+                   "name": "B",
+                    "imageurl": "",
+                    "zone": "",
+                    "stop": {
+
+                    }
+                }
+            ]
+        },
+
+        {
+            "name": "8",
+            "ramals": 
+            [
+                {
+                   "name": "A",
+                    "imageurl": "",
+                    "zone": "",
+                    "stop": {
+
+                    }
+                },{
+                   "name": "B",
+                    "imageurl": "",
+                    "zone": "",
+                    "stop": {
+
+                    }
+                }
+            ]
+        }
+    ]
+}
