@@ -20,7 +20,7 @@ Route::get('/modelo1', function () {
 });
 
 Route::get('/modelo2', function () {
-    return view('disenos/modelo2');
+    return response()->view('disenos/modelo2')->header('Access-Control-Allow-Origin', '*');
 });
 
 Route::get('/modelo3', function () {

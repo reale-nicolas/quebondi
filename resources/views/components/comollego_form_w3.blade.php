@@ -5,12 +5,12 @@
             <div class="w3-col">
                 <div class="w3-row">
                     <div class="input-group">
-                        <span class="input-group-addon" style="cursor:pointer" onclick="getLocation()">
+                        <span class="input-group-addon" style="cursor:pointer" onclick="getLocation()" id="origen-span-addon">
                             <i class="glyphicon glyphicon-screenshot"></i>
                         </span>
                         <label for="destino-input" class="control-label sr-only">Desde:</label>
-                        <input type="text" id="origen-input" class="w3-input input-lg" placeholder="Desde" tabindex="1" 
-                           aria-describedby="inputSuccess2Status"/>
+                        <input type="text" id="origen-input" class="w3-input input-lg form-control" placeholder="Desde" tabindex="1" 
+                           aria-describedby="origen-span-addon"/>
                     </div>
 
                     <!---------------------------->
@@ -30,10 +30,12 @@
                 </div>
                 <div class="w3-row">
                     <div class="input-group">
-                        <span class="input-group-addon" style="cursor:pointer"><i class="glyphicon glyphicon-screenshot"></i></span>
+                        <span class="input-group-addon" style="cursor:pointer" id="destino-span-addon">
+                            <i class="glyphicon glyphicon-screenshot"></i>
+                        </span>
                         <label for="destino-input" class="control-label sr-only">Hasta:</label>
-                        <input type="text" id="destino-input" class="w3-input input-lg" placeholder="Hasta" tabindex="2" 
-                               aria-describedby="inputSuccess2Status"/>
+                        <input type="text" id="destino-input" class="w3-input input-lg form-control" placeholder="Hasta" tabindex="2" 
+                               aria-describedby="destino-span-addon"/>
                     </div>
                     <!---------------------------->
                     <input type="hidden" id="destino-street_number"/>
