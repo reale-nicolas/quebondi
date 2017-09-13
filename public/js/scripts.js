@@ -1,7 +1,10 @@
 var map;
-var arrMarker = [];
-var arrAutocomplete = [];
-var arrInput = [];
+var arrMarker                   = [];
+var arrAutocomplete             = [];
+var arrInput                    = [];
+
+var arrCorredoresBusStopRoute   = [];
+var arrMarksAndPathBusStopRoute   = [];
 
 var marker;
 var infowindow;
@@ -133,80 +136,120 @@ function initializeMap()
     {
         $.ajax(
         {
-            url: "http://api_quebondi.app/api/lines",
+            url: "http://comollego_ws.app/api/buseslines/",
             type: 'GET',
             async: false,
-            jsonpCallback: 'cargarOpcionesMenuRecorridosXLinea',
+//            jsonpCallback: 'cargarOpcionesMenuRecorridosXLinea',
             contentType: "application/json",
             dataType: 'jsonp',
             success: function(JSONResult) {
-                JSONPcallback(JSONResult);
-//               cargarOpcionesMenuRecorridosXLinea(JSONResult);
-            },
-            error: function(e) {
-               console.log(e.message);
+                JSONPgetLinesCallback(JSONResult);
+               
             }
         });
     }
     
-   
-   function JSONPcallback(jsonResponse){
-//       console.log(jsonResponse);
-   }
     
-    function displayMenuOptionOnMap(latlng)
-    {
-        marker.setPosition(latlng);
-        marker.setVisible(true);
+    
+function selectRamalMenuItems(corredorName, ramalName)
+{
+    var checkbox = document.getElementById("li-corredor-"+corredorName+"-ramal-"+ramalName).getElementsByTagName('input')[0];
 
-        var geocoder = new google.maps.Geocoder;
-        geocoder.geocode({'location': latlng}, function(results, status) 
+    if (checkbox.checked)
+    {
+        checkbox.checked = false;
+        
+        for (var i = 0; i < arrMarksAndPathBusStopRoute.length; i++)
         {
-            if (status === 'OK') 
+            if (arrMarksAndPathBusStopRoute[i][0] == corredorName && arrMarksAndPathBusStopRoute[i][1] == ramalName)
             {
-                if (results[0]) 
+                //Ocultamos la ruta trazada para el corredor y ramal especificado.
+                arrMarksAndPathBusStopRoute[i][4].setMap(null);
+                
+                //Ocultamos las paradas para el corredor y ramal especificado.
+                for (var j = 0; j < arrMarksAndPathBusStopRoute[i][3].length; j++)
                 {
-                    console.log(results[0]);
-                    var street = getAddressComponenet(results[0], "route");
-                    var door_number = getAddressComponenet(results[0], "street_number");
-                    var locality = getAddressComponenet(results[0], "administrative_area_level_2");
-                    var province = getAddressComponenet(results[0], "administrative_area_level_1");
-                    
-                    var placeId = results[0].place_id;
-                    
-                    if (street === "Unnamed Road") {
-                        street = "Calle S/N";
-                    }
-                    if (door_number === null) {
-                        door_number = "S/N";
-                    }
-                    if (locality === null) {
-                        locality = "";
-                    }
-                    if (province === null) {
-                        province = "";
-                    }
-                    
-                    infowindow.setContent('\
-                        <div class="" style="min-width:200px">'+
-                            '<strong>'+
-                                street +' '+ door_number +' - ' +
-                                locality +
-                            '</strong><br>' +
-                            results[0].geometry.location + '<br><br>' +
-                            '<div class="col-xs-6 text-left"><a href="#" role="button" onclick="setOrigenDestino(\''+placeId+'\', \'origen\')">Desde aqui</a></div>'+
-                            '<div class="text-right"><a href="#" role="button" onclick="setOrigenDestino(\''+placeId+'\', \'destino\')">Hasta aqui</a></div>'+
-                        '</div>'
-                    );
-                    infowindow.open(map, marker);
-                } else {
-                    window.alert('No results found');
+                    arrMarksAndPathBusStopRoute[i][3][j].setMap(null);
                 }
-            } else {
-                window.alert('Geocoder failed due to: ' + status);
             }
-        });
+        }
     }
+    else
+    {
+        checkbox.checked = true;
+        
+        for (var i = 0; i < arrMarksAndPathBusStopRoute.length; i++)
+        {
+            if (arrMarksAndPathBusStopRoute[i][0] == corredorName && arrMarksAndPathBusStopRoute[i][1] == ramalName)
+            {
+//                JSONPgetAllLinesByNumberAndLetterCallback (arrMarksAndPathBusStopRoute[i]);
+                drawBusStopsAndRoute(arrMarksAndPathBusStopRoute[i][0], arrMarksAndPathBusStopRoute[i][1], arrMarksAndPathBusStopRoute[i][2]);
+                return;
+            }
+        }
+        
+        var jsonRecorrido = JSON.parse(checkbox.getAttribute("stops"));
+        if (jsonRecorrido === null && typeof jsonRecorrido === 'object')
+        {
+            getCorredorRamalAll(corredorName, ramalName);
+        }
+    }
+}    
+        
+        
+function displayMenuOptionOnMap(latlng)
+{
+    marker.setPosition(latlng);
+    marker.setVisible(true);
+
+    var geocoder = new google.maps.Geocoder;
+    geocoder.geocode({'location': latlng}, function(results, status) 
+    {
+        if (status === 'OK') 
+        {
+            if (results[0]) 
+            {
+                console.log(results[0]);
+                var street = getAddressComponenet(results[0], "route");
+                var door_number = getAddressComponenet(results[0], "street_number");
+                var locality = getAddressComponenet(results[0], "administrative_area_level_2");
+                var province = getAddressComponenet(results[0], "administrative_area_level_1");
+
+                var placeId = results[0].place_id;
+
+                if (street === "Unnamed Road") {
+                    street = "Calle S/N";
+                }
+                if (door_number === null) {
+                    door_number = "S/N";
+                }
+                if (locality === null) {
+                    locality = "";
+                }
+                if (province === null) {
+                    province = "";
+                }
+
+                infowindow.setContent('\
+                    <div class="" style="min-width:200px">'+
+                        '<strong>'+
+                            street +' '+ door_number +' - ' +
+                            locality +
+                        '</strong><br>' +
+                        results[0].geometry.location + '<br><br>' +
+                        '<div class="col-xs-6 text-left"><a href="#" role="button" onclick="setOrigenDestino(\''+placeId+'\', \'origen\')">Desde aqui</a></div>'+
+                        '<div class="text-right"><a href="#" role="button" onclick="setOrigenDestino(\''+placeId+'\', \'destino\')">Hasta aqui</a></div>'+
+                    '</div>'
+                );
+                infowindow.open(map, marker);
+            } else {
+                window.alert('No results found');
+            }
+        } else {
+            window.alert('Geocoder failed due to: ' + status);
+        }
+    });
+}
     
     function setOrigenDestino(placeId, origenDestino)
     {

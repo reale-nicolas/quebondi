@@ -1,15 +1,221 @@
 <script>
+
+
+
+function drawBusRoute(busRoute)
+{
+    var rutaBusCoordenadas = new Array(); 
+
+    for (var j = 0; j < busRoute.length; j++) 
+    {
+        rutaBusCoordenadas[j] = {lat: busRoute[j].latitud, lng: busRoute[j].longitud};
+    }
+
+    return new google.maps.Polyline({
+        path: rutaBusCoordenadas,
+        map: map,
+        geodesic: true,
+        strokeColor: '#'+Math.floor(Math.random()*16777215).toString(16),
+        strokeOpacity: 1.0,
+        strokeWeight: 2
+    });
+}
+
+
+function drawBusStops(busStop)
+{
+    var markers = [];
+    for (var j = 0; j < busStop.length; j++) 
+    {
+        markers.push(
+            new google.maps.Marker(
+            {
+                map: map,
+                position: {lat: busStop[j].latitud, lng: busStop[j].longitud}
+            })
+        );
+    }
+    return markers;
+}
+
+function drawBusStopsAndRoute(number, letter, zone)
+{
+    for( var i = 0; i < arrMarksAndPathBusStopRoute.length; i++)
+    {
+        if ( arrMarksAndPathBusStopRoute[i][0] == number &&
+             arrMarksAndPathBusStopRoute[i][1] == letter ) 
+        {
+            
+            arrMarksAndPathBusStopRoute[i][4].setMap(map);
+            
+            for (var j = 0; j < arrMarksAndPathBusStopRoute[i][3].length; j++) 
+            {
+                arrMarksAndPathBusStopRoute[i][3][j].setMap(map);
+            }     
+        }
+    }    
+}
+
+
+
+function cargarOpcionesMenuRecorridosXLinea(jsonResult)
+    {
+//        console.log(jsonResult);
+        
+        var lines = new Array();
+
+        for (var i = 0; i < jsonResult.length; i++) 
+        {
+            var corredor = jsonResult[i];
+          
+            if (!Array.isArray(lines[[corredor.number, corredor.letter]]))
+                lines[[corredor.number, corredor.letter]] = new Array();
+            lines[[corredor.number, corredor.letter]].push(corredor.zone);
+ 
+        }
+        
+        
+        var divElementMenuContent = document.getElementById("divRecorridosLineaList");
+        divElementMenuContent.innerHTML = '';
+        
+        
+        for (var index in lines) 
+        {
+//            console.log("Element: "+lines[index]+" - Index: "+index);
+            
+            var arrCorredor     = index.split(",");
+            var corredorName    = arrCorredor[0];
+            var ramalName       = arrCorredor[1];
+//            var corredorName = corredor.name;
+            
+//            console.log( corredorName+ramalName);
+
+            var aElement = document.getElementById("a-corredor-"+corredorName);
+            
+            if(aElement === null && typeof aElement === "object")
+            {
+                aElement = document.createElement("a");
+                aElement.setAttribute("id", "a-corredor-"+corredorName);
+                aElement.setAttribute("href", "#");
+                aElement.setAttribute("class","w3-bar-item w3-button");
+                aElement.setAttribute("onclick","$('#div-corredor-"+corredorName+"').toggleClass('w3-hide');");
+                
+                var iElement = document.createElement("i");
+                iElement.setAttribute("class","fa fa-bus w3-margin-right");
+
+                var spanElement = document.createElement("span");
+                spanElement.innerHTML = "Línea "+corredorName;
+
+                aElement.appendChild(iElement);
+                aElement.appendChild(spanElement);
+
+                divElementMenuContent.appendChild(aElement);
+                
+                var divElement = document.createElement("div");
+                divElement.setAttribute("id", "div-corredor-"+corredorName);
+                divElement.setAttribute("class", "w3-hide");
+
+                var ulElement = document.createElement("ul");
+                ulElement.setAttribute("id", "ul-corredor-"+corredorName);
+                ulElement.setAttribute("class", "w3-ul w3-right");
+                ulElement.setAttribute("style", "width:90%");
+                
+            } else {
+                
+                var divElement = document.getElementById("div-corredor-"+corredorName);
+            
+                var ulElement = document.getElementById("ul-corredor-"+corredorName);
+            }
+            
+            
+            
+            
+                
+            
+                
+                var liElement       = document.createElement("li");
+                liElement.setAttribute("id","li-corredor-"+corredorName+"-ramal-"+ramalName);
+                liElement.setAttribute("class","w3-padding-16");
+                liElement.setAttribute("style","cursor:pointer;");
+                liElement.setAttribute("onclick","selectRamalMenuItems('"+corredorName+"','"+ramalName+"')");
+                liElement.onmouseover = function(){this.style.backgroundColor = "#d3f9ec";};
+                liElement.onmouseout  = function(){this.style.backgroundColor = "#ffffff";};
+                var spanElement     = document.createElement("span");
+                spanElement.setAttribute("class","w3-button w3-white w3-right");
+                spanElement.setAttribute("style", "padding: 0px;height: 20px;");
+            
+            
+                var inputElement    = document.createElement("input");
+                inputElement.setAttribute("type", "checkbox");
+                inputElement.setAttribute("class", "w3-check");
+                inputElement.setAttribute("style","cursor:pointer;margin:0px;top:0px;width:20px;height:20px;");
+                
+                
+//                var recorridoStr = '{"lines":[';
+//                var esPrimero = true;
+//                for (var k = 0; k < ramal.stop.length; k++) 
+//                {
+//                    if (!esPrimero)
+//                        recorridoStr += ', ';
+//                    recorridoStr += '{"latitud":'+ramal.stop[k].latitud+', "longitud":'+ramal.stop[k].longitud+'}';
+//                    esPrimero = false;
+//                }
+//                recorridoStr += ']}';
+////var recorridoStr = '{"lines":"1"}';
+//                inputElement.setAttribute("stops",recorridoStr);
+                
+                
+                var imgElement      = document.createElement("img");
+                imgElement.setAttribute("class","w3-left w3-margin-right");
+                imgElement.setAttribute("style","width:30px");
+                imgElement.setAttribute("src","{{ URL::asset('images/') }}/"+corredorName+ramalName+".png");
+                var span1Element    = document.createElement("span");
+                span1Element.innerHTML = "Ramal "+ramalName;
+                
+            
+                spanElement.appendChild(inputElement);
+                liElement.appendChild(spanElement);
+                liElement.appendChild(imgElement);
+                liElement.appendChild(span1Element);
+                
+                ulElement.appendChild(liElement);
+            
+            
+            
+            
+            
+            divElement.appendChild(ulElement);
+            divElementMenuContent.appendChild(divElement);
+        }
+        
+    } 
     
-    function cargarOpcionesMenuRecorridosXLinea(jsonResult)
+    
+    
+    
+    function cargarOpcionesMenuRecorridosXLinea123Back(jsonResult)
     {
         console.log(jsonResult);
-        console.log(jsonResult.lines);
+        
+        var lines = new Array();
+        
+        for (var i = 0; i < jsonResult.length; i++) 
+        {
+            var corredor = jsonResult[i];
+          
+            if (!Array.isArray(lines[[corredor.number, corredor.letter]]))
+                lines[[corredor.number, corredor.letter]] = new Array();
+            lines[[corredor.number, corredor.letter]].push(corredor.zone);
+ 
+        }
+        console.log(lines);
+        
         var divElementMenuContent = document.getElementById("divRecorridosLineaList");
         divElementMenuContent.innerHTML = '';
             
-        for (var i = 0; i < jsonResult.lines.length; i++) 
+        for (var i = 0; i < jsonResult.length; i++) 
         {
-            var corredor = jsonResult.lines[i];
+            var corredor = jsonResult[i];
             var corredorName = corredor.name;
             
             console.log("Corredor: "+corredorName + corredor );
@@ -121,36 +327,19 @@
         //cajadatos.innerHTML=e.target.responseText; 
     } 
     
-    function selectRamalMenuItems(corredorName, ramalName)
-    {
-        var checkbox = document.getElementById("li-corredor-"+corredorName+"-ramal-"+ramalName).getElementsByTagName('input')[0];
-        var jsonRecorrido = JSON.parse(checkbox.getAttribute("stops"));
-        console.log(jsonRecorrido.lines);
-        drawBusesStops(jsonRecorrido.lines);
-        if (checkbox.checked)
-        {
-            checkbox.checked = false;
-        }
-        else
-        {
-            checkbox.checked = true;
-        }
+
+
+
+
         
-    }
+        
+//        console.log(jsonRecorrido);
+//        
+//        drawBusesStops(jsonRecorrido.lines);
+
+   
     
-    function drawBusesStops(busStops)
-    {
-        for (var i = 0; i < busStops.length; i++) 
-        {
-            console.log("lat: "+busStops[i].latitud+" - Lng: "+busStops[i].longitud);
-            var LatLng = google.maps.LatLng(busStops[i].latitud, busStops[i].longitud);
-            new google.maps.Marker(
-            {
-                map: map,
-                position: {lat: busStops[i].latitud, lng: busStops[i].longitud}
-            });
-        }
-    }
+    
     function addMarker(place)
     {
         var marker = new google.maps.Marker(
@@ -158,15 +347,6 @@
             map: map
         });
 
-//        marker.setIcon(/** @type {google.maps.Icon} */(
-//        {
-//            url: place.icon,
-//            size: new google.maps.Size(71, 71),
-//            origin: new google.maps.Point(0, 0),
-//            anchor: new google.maps.Point(17, 34),
-//            scaledSize: new google.maps.Size(35, 35)
-//        }));
-console.log("Vamo con el typeof: "+ typeof place.geometry);
         if (typeof place.geometry !== 'undefined'){
             marker.setPosition(place.geometry.location);
         } else {
