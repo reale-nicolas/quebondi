@@ -13,6 +13,8 @@
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <!--<link rel="stylesheet" href="{{ URL::asset('css/font-awesome.min.css') }}">-->
+    <link rel="stylesheet" href="{{ URL::asset('css/app.css') }}">
+    
     
     <style>
         html,body,h1,h2,h3,h4,h5 {font-family: "RobotoDraft", "Roboto", sans-serif;}
@@ -20,8 +22,8 @@
     </style>
     <script 
         src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB3FxKEgf10vNGHSUUYms4rl8cusliiVgM&libraries=geometry,places">
-    </script>
-    
+    </script><!--
+    -->
     <!-- Latest compiled and minified CSS -->
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <!--<link rel="stylesheet" href="{{ URL::asset('css/bootstrap.min.css') }}">-->
@@ -38,7 +40,10 @@
     <!--<script src="{{ URL::asset('js/bootstrap.min.js') }}"></script>-->
     
     <!-- Scripts propios -->
+    <script src="{{ URL::asset('js/spin.min.js') }}"></script>
     <script src="{{ URL::asset('js/scripts.js') }}"></script>
+    <script src="{{ URL::asset('js/ajaxCalls.js') }}"></script>
+    <script src="{{ URL::asset('js/callbackFunctions.js') }}"></script>
     <!--<script src="{{ URL::asset('js/ContextMenu.js') }}"></script>-->
     
     

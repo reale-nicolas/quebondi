@@ -1,123 +1,221 @@
-
-
 <script>
-    var map;
-    var arrMarker = [];
-    var arrAutocomplete = [];
-    var arrInput = [];
-    var componentForm = {
-        street_number: 'short_name',
-        route: 'long_name',
-        locality: 'long_name',
-        administrative_area_level_1: 'short_name',
-        country: 'long_name',
-        postal_code: 'short_name'
-    };
 
 
-    function initializeApplication()
+
+function drawBusRoute(busRoute)
+{
+    var rutaBusCoordenadas = new Array(); 
+
+    for (var j = 0; j < busRoute.length; j++) 
     {
-        initializeMap();
-//   
-//             initializeAutocompleteInput();
-        setTimeout(intializeRecorridosList, 2500);
-        
-    }
-    
-    
-    function initializeMap()
-    {
-        var mapTypeIds = [];
-        mapTypeIds.push("GoogleRoadMaps");
-    
-        //Iniciamos un nuevo mapa
-        map = new google.maps.Map(document.getElementById('map'), {
-            zoom: 12,
-            center: new google.maps.LatLng(-24.7931342, -65.4303173),
-            streetViewControl: false,
-            mapTypeControl: true,
-            mapTypeId: "GoogleRoadMaps",
-            mapTypeControlOptions: {
-                mapTypeIds: mapTypeIds,
-                position: google.maps.ControlPosition.TOP_RIGHT
-            }
-        });
-
-        map.mapTypes.set("GoogleRoadMaps", new google.maps.ImageMapType({
-            getTileUrl: function (coord, zoom) {
-
-                return "http://localhost/mapas_ciudades/salta/" + zoom + "/" + coord.x + "/" + coord.y + ".png";
-            },
-            tileSize: new google.maps.Size(256, 256),
-            name: "GoogleRoadMaps",
-            maxZoom: 17
-        }));
-    
-        //Seteamos el rectangulo del mapa que se cargara al momento del inicio.
-        //        var bounds = new google.maps.LatLngBounds(
-        //                new google.maps.LatLng(-24.578060, -65.684399),
-        //                new google.maps.LatLng(-25.171035, -65.266363)
-        //                );
-        //        map.fitBounds(bounds);
-    }
-    
-    
-    
-    function initializeAutocompleteInput()
-    {
-        arrInput['origen'] = document.getElementById('origen-input');
-        arrInput['destino'] = document.getElementById('destino-input');
-        var options = {
-            types: ['address'],
-            componentRestrictions: {country: 'ar'}
-        };
-
-        //event fired when user selects direction from list direction.
-        //Here we have to make a marker into maps showing the point selected by user.
-        arrAutocomplete['origen'] = new google.maps.places.Autocomplete(arrInput['origen'], options);
-        google.maps.event.addListener(arrAutocomplete['origen'], 'place_changed', function ()
-        {
-            onPlaceListItemSelected(arrAutocomplete['origen'].getPlace(), "origen");
-        });
-
-
-        arrAutocomplete['destino'] = new google.maps.places.Autocomplete(arrInput['destino'], options);
-        google.maps.event.addListener(arrAutocomplete['destino'], 'place_changed', function ()
-        {
-            onPlaceListItemSelected(arrAutocomplete['destino'].getPlace(), "destino");
-        });
+        rutaBusCoordenadas[j] = {lat: busRoute[j].latitud, lng: busRoute[j].longitud};
     }
 
+    return new google.maps.Polyline({
+        path: rutaBusCoordenadas,
+        map: map,
+        geodesic: true,
+        strokeColor: '#'+Math.floor(Math.random()*16777215).toString(16),
+        strokeOpacity: 1.0,
+        strokeWeight: 2
+    });
+}
 
-    function intializeRecorridosList()
+
+function drawBusStops(busStop)
+{
+    var markers = [];
+    for (var j = 0; j < busStop.length; j++) 
     {
-        $.ajax(
+        markers.push(
+            new google.maps.Marker(
             {
-                type: "GET",
-                url: "<?php echo e(URL::asset('resources/getlines.json')); ?>",
-                cache: false
-            }).done(function(JSONResult) {
-                cargarOpcionesMenuRecorridosXLinea(JSONResult);
-            });
-            
-//         var url = "http://quebondi.app/resources/getlines.json";  
-//         var solicitud = new XMLHttpRequest();
-//         
-//         solicitud.addEventListener('load', mostrar, false);
-//         solicitud.open("GET", url, true);  
-//         solicitud.send(null); 
+                map: map,
+                position: {lat: busStop[j].latitud, lng: busStop[j].longitud}
+            })
+        );
     }
+    return markers;
+}
+
+function drawBusStopsAndRoute(number, letter, zone)
+{
+    for( var i = 0; i < arrMarksAndPathBusStopRoute.length; i++)
+    {
+        if ( arrMarksAndPathBusStopRoute[i][0] == number &&
+             arrMarksAndPathBusStopRoute[i][1] == letter ) 
+        {
+            
+            arrMarksAndPathBusStopRoute[i][4].setMap(map);
+            
+            for (var j = 0; j < arrMarksAndPathBusStopRoute[i][3].length; j++) 
+            {
+                arrMarksAndPathBusStopRoute[i][3][j].setMap(map);
+            }     
+        }
+    }    
+}
+
+
+
+function cargarOpcionesMenuRecorridosXLinea(jsonResult)
+    {
+//        console.log(jsonResult);
+        
+        var lines = new Array();
+
+        for (var i = 0; i < jsonResult.length; i++) 
+        {
+            var corredor = jsonResult[i];
+          
+            if (!Array.isArray(lines[[corredor.number, corredor.letter]]))
+                lines[[corredor.number, corredor.letter]] = new Array();
+            lines[[corredor.number, corredor.letter]].push(corredor.zone);
+ 
+        }
+        
+        
+        var divElementMenuContent = document.getElementById("divRecorridosLineaList");
+        divElementMenuContent.innerHTML = '';
+        
+        
+        for (var index in lines) 
+        {
+//            console.log("Element: "+lines[index]+" - Index: "+index);
+            
+            var arrCorredor     = index.split(",");
+            var corredorName    = arrCorredor[0];
+            var ramalName       = arrCorredor[1];
+//            var corredorName = corredor.name;
+            
+//            console.log( corredorName+ramalName);
+
+            var aElement = document.getElementById("a-corredor-"+corredorName);
+            
+            if(aElement === null && typeof aElement === "object")
+            {
+                aElement = document.createElement("a");
+                aElement.setAttribute("id", "a-corredor-"+corredorName);
+                aElement.setAttribute("href", "#");
+                aElement.setAttribute("class","w3-bar-item w3-button");
+                aElement.setAttribute("onclick","$('#div-corredor-"+corredorName+"').toggleClass('w3-hide');");
+                
+                var iElement = document.createElement("i");
+                iElement.setAttribute("class","fa fa-bus w3-margin-right");
+
+                var spanElement = document.createElement("span");
+                spanElement.innerHTML = "Línea "+corredorName;
+
+                aElement.appendChild(iElement);
+                aElement.appendChild(spanElement);
+
+                divElementMenuContent.appendChild(aElement);
+                
+                var divElement = document.createElement("div");
+                divElement.setAttribute("id", "div-corredor-"+corredorName);
+                divElement.setAttribute("class", "w3-hide");
+
+                var ulElement = document.createElement("ul");
+                ulElement.setAttribute("id", "ul-corredor-"+corredorName);
+                ulElement.setAttribute("class", "w3-ul w3-right");
+                ulElement.setAttribute("style", "width:90%");
+                
+            } else {
+                
+                var divElement = document.getElementById("div-corredor-"+corredorName);
+            
+                var ulElement = document.getElementById("ul-corredor-"+corredorName);
+            }
+            
+            
+            
+            
+                
+            
+                
+                var liElement       = document.createElement("li");
+                liElement.setAttribute("id","li-corredor-"+corredorName+"-ramal-"+ramalName);
+                liElement.setAttribute("class","w3-padding-16");
+                liElement.setAttribute("style","cursor:pointer;");
+                liElement.setAttribute("onclick","selectRamalMenuItems('"+corredorName+"','"+ramalName+"')");
+                liElement.onmouseover = function(){this.style.backgroundColor = "#d3f9ec";};
+                liElement.onmouseout  = function(){this.style.backgroundColor = "#ffffff";};
+                var spanElement     = document.createElement("span");
+                spanElement.setAttribute("class","w3-button w3-white w3-right");
+                spanElement.setAttribute("style", "padding: 0px;height: 20px;");
+            
+            
+                var inputElement    = document.createElement("input");
+                inputElement.setAttribute("type", "checkbox");
+                inputElement.setAttribute("class", "w3-check");
+                inputElement.setAttribute("style","cursor:pointer;margin:0px;top:0px;width:20px;height:20px;");
+                
+                
+//                var recorridoStr = '{"lines":[';
+//                var esPrimero = true;
+//                for (var k = 0; k < ramal.stop.length; k++) 
+//                {
+//                    if (!esPrimero)
+//                        recorridoStr += ', ';
+//                    recorridoStr += '{"latitud":'+ramal.stop[k].latitud+', "longitud":'+ramal.stop[k].longitud+'}';
+//                    esPrimero = false;
+//                }
+//                recorridoStr += ']}';
+////var recorridoStr = '{"lines":"1"}';
+//                inputElement.setAttribute("stops",recorridoStr);
+                
+                
+                var imgElement      = document.createElement("img");
+                imgElement.setAttribute("class","w3-left w3-margin-right");
+                imgElement.setAttribute("style","width:30px");
+                imgElement.setAttribute("src","<?php echo e(URL::asset('images/')); ?>/"+corredorName+ramalName+".png");
+                var span1Element    = document.createElement("span");
+                span1Element.innerHTML = "Ramal "+ramalName;
+                
+            
+                spanElement.appendChild(inputElement);
+                liElement.appendChild(spanElement);
+                liElement.appendChild(imgElement);
+                liElement.appendChild(span1Element);
+                
+                ulElement.appendChild(liElement);
+            
+            
+            
+            
+            
+            divElement.appendChild(ulElement);
+            divElementMenuContent.appendChild(divElement);
+        }
+        
+    } 
     
-    function cargarOpcionesMenuRecorridosXLinea(jsonResult)
+    
+    
+    
+    function cargarOpcionesMenuRecorridosXLinea123Back(jsonResult)
     {
         console.log(jsonResult);
-        console.log(jsonResult.lines);
+        
+        var lines = new Array();
+        
+        for (var i = 0; i < jsonResult.length; i++) 
+        {
+            var corredor = jsonResult[i];
+          
+            if (!Array.isArray(lines[[corredor.number, corredor.letter]]))
+                lines[[corredor.number, corredor.letter]] = new Array();
+            lines[[corredor.number, corredor.letter]].push(corredor.zone);
+ 
+        }
+        console.log(lines);
+        
         var divElementMenuContent = document.getElementById("divRecorridosLineaList");
         divElementMenuContent.innerHTML = '';
             
-        for (var i = 0; i < jsonResult.lines.length; i++) 
+        for (var i = 0; i < jsonResult.length; i++) 
         {
-            var corredor = jsonResult.lines[i];
+            var corredor = jsonResult[i];
             var corredorName = corredor.name;
             
             console.log("Corredor: "+corredorName + corredor );
@@ -126,7 +224,7 @@
             aElement.setAttribute("id", "a-corredor-"+corredorName);
             aElement.setAttribute("href", "#");
             aElement.setAttribute("class","w3-bar-item w3-button");
-            aElement.setAttribute("onclick","showHideMenuOption('div-corredor-"+corredorName+"',null)");
+            aElement.setAttribute("onclick","$('#div-corredor-"+corredorName+"').toggleClass('w3-hide');");
             
             var iElement = document.createElement("i");
             iElement.setAttribute("class","fa fa-bus w3-margin-right");
@@ -166,6 +264,20 @@
                 inputElement.setAttribute("type", "checkbox");
                 inputElement.setAttribute("class", "w3-check");
                 inputElement.setAttribute("style","cursor:pointer;margin:0px;top:0px;width:20px;height:20px;");
+                
+                var recorridoStr = '{"lines":[';
+                var esPrimero = true;
+                for (var k = 0; k < ramal.stop.length; k++) 
+                {
+                    if (!esPrimero)
+                        recorridoStr += ', ';
+                    recorridoStr += '{"latitud":'+ramal.stop[k].latitud+', "longitud":'+ramal.stop[k].longitud+'}';
+                    esPrimero = false;
+                }
+                recorridoStr += ']}';
+//var recorridoStr = '{"lines":"1"}';
+                inputElement.setAttribute("stops",recorridoStr);
+                
                 var imgElement      = document.createElement("img");
                 imgElement.setAttribute("class","w3-left w3-margin-right");
                 imgElement.setAttribute("style","width:30px");
@@ -215,38 +327,31 @@
         //cajadatos.innerHTML=e.target.responseText; 
     } 
     
-    function selectRamalMenuItems(corredorName, ramalName)
-    {
-        var checkbox = document.getElementById("li-corredor-"+corredorName+"-ramal-"+ramalName).getElementsByTagName('input')[0];
+
+
+
+
         
-        if (checkbox.checked)
-        {
-            checkbox.checked = false;
-        }
-        else
-        {
-            checkbox.checked = true;
-        }
         
-    }
+//        console.log(jsonRecorrido);
+//        
+//        drawBusesStops(jsonRecorrido.lines);
+
+   
+    
     
     function addMarker(place)
     {
         var marker = new google.maps.Marker(
-                {
-                    map: map
-                });
+        {
+            map: map
+        });
 
-        marker.setIcon(/** @type  {google.maps.Icon} */(
-                {
-                    url: place.icon,
-                    size: new google.maps.Size(71, 71),
-                    origin: new google.maps.Point(0, 0),
-                    anchor: new google.maps.Point(17, 34),
-                    scaledSize: new google.maps.Size(35, 35)
-                }));
-
-        marker.setPosition(place.geometry.location);
+        if (typeof place.geometry !== 'undefined'){
+            marker.setPosition(place.geometry.location);
+        } else {
+            marker.setPosition(place);
+        }
         marker.setVisible(true);
 
         return marker;
@@ -269,50 +374,7 @@
     }
 
 
-    function onPlaceListItemSelected(place, tipoDireccion)
-    {
-//        var place = inputAddress.getPlace();
-        //Verificamos que la varibale tipoDireccion se encuentre seteada
-        //y que su valor pertenezca a los valores aceptados.
-        if ((tipoDireccion !== 'origen' && tipoDireccion !== 'destino') || (!place.geometry))
-        {
-            return null;
-        }
-        //Limpiamos los valores que puedan tener los campos de direccion, pues se deben rellenar 
-        //con la nueva direccion seleccionada.
-        unsetVaribales(tipoDireccion);
-
-        // If the place has a geometry, then present it on a map.
-        if (place.geometry.viewport)
-        {
-            map.fitBounds(place.geometry.viewport);
-        } else
-        {
-            map.setCenter(place.geometry.location);
-            map.setZoom(16);
-        }
-
-
-        // Get each component of the address from the place details
-        // and fill the corresponding field on the form.
-        for (var i = 0; i < place.address_components.length; i++)
-        {
-            var addressType = place.address_components[i].types[0];
-            if (componentForm[addressType])
-            {
-                var val = place.address_components[i][componentForm[addressType]];
-                document.getElementById(tipoDireccion + "-" + addressType).value = val;
-            }
-        }
-        document.getElementById(tipoDireccion + "-latitud").value = place.geometry.location.lat();
-        document.getElementById(tipoDireccion + "-longitud").value = place.geometry.location.lng();
-
-
-
-        arrMarker[tipoDireccion] = addMarker(place);
-
-        console.log(JSON.stringify(place));
-    }
+    
 
     $(document).ready(function ()
     {
@@ -376,7 +438,7 @@
                 });
         // Handler for .ready() called.
         var arrScreenDimension = getWidthAndHeightScreen();
-        document.getElementById("map").style.height = (arrScreenDimension.height - $('#header').height()) + "px";
+        document.getElementById("map").style.height = arrScreenDimension.height + "px";
     });
 
     function manageInputsClass(tipoDireccion)
@@ -560,11 +622,260 @@
         console.log("Lat: " + position.coords.latitude + "Lon: " + position.coords.longitude);
     }
 
+var styledMapType = new google.maps.StyledMapType(
+[
+  {
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#ebe3cd"
+      }
+    ]
+  },
+  {
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#523735"
+      }
+    ]
+  },
+  {
+    "elementType": "labels.text.stroke",
+    "stylers": [
+      {
+        "color": "#f5f1e6"
+      }
+    ]
+  },
+  {
+    "featureType": "administrative",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "visibility": "off"
+      }
+    ]
+  },
+  {
+    "featureType": "administrative",
+    "elementType": "geometry.stroke",
+    "stylers": [
+      {
+        "color": "#c9b2a6"
+      }
+    ]
+  },
+  {
+    "featureType": "administrative.land_parcel",
+    "elementType": "geometry.stroke",
+    "stylers": [
+      {
+        "color": "#dcd2be"
+      }
+    ]
+  },
+  {
+    "featureType": "administrative.land_parcel",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#ae9e90"
+      }
+    ]
+  },
+  {
+    "featureType": "landscape.natural",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#dfd2ae"
+      }
+    ]
+  },
+  {
+    "featureType": "poi",
+    "stylers": [
+      {
+        "visibility": "off"
+      }
+    ]
+  },
+  {
+    "featureType": "poi",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#dfd2ae"
+      }
+    ]
+  },
+  {
+    "featureType": "poi",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#93817c"
+      }
+    ]
+  },
+  {
+    "featureType": "poi.park",
+    "elementType": "geometry.fill",
+    "stylers": [
+      {
+        "color": "#a5b076"
+      }
+    ]
+  },
+  {
+    "featureType": "poi.park",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#447530"
+      }
+    ]
+  },
+  {
+    "featureType": "road",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#f5f1e6"
+      }
+    ]
+  },
+  {
+    "featureType": "road",
+    "elementType": "labels.icon",
+    "stylers": [
+      {
+        "visibility": "off"
+      }
+    ]
+  },
+  {
+    "featureType": "road.arterial",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#fdfcf8"
+      }
+    ]
+  },
+  {
+    "featureType": "road.highway",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#f8c967"
+      }
+    ]
+  },
+  {
+    "featureType": "road.highway",
+    "elementType": "geometry.stroke",
+    "stylers": [
+      {
+        "color": "#e9bc62"
+      }
+    ]
+  },
+  {
+    "featureType": "road.highway.controlled_access",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#e98d58"
+      }
+    ]
+  },
+  {
+    "featureType": "road.highway.controlled_access",
+    "elementType": "geometry.stroke",
+    "stylers": [
+      {
+        "color": "#db8555"
+      }
+    ]
+  },
+  {
+    "featureType": "road.local",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#806b63"
+      }
+    ]
+  },
+  {
+    "featureType": "transit",
+    "stylers": [
+      {
+        "visibility": "off"
+      }
+    ]
+  },
+  {
+    "featureType": "transit.line",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#dfd2ae"
+      }
+    ]
+  },
+  {
+    "featureType": "transit.line",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#8f7d77"
+      }
+    ]
+  },
+  {
+    "featureType": "transit.line",
+    "elementType": "labels.text.stroke",
+    "stylers": [
+      {
+        "color": "#ebe3cd"
+      }
+    ]
+  },
+  {
+    "featureType": "transit.station",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#dfd2ae"
+      }
+    ]
+  },
+  {
+    "featureType": "water",
+    "elementType": "geometry.fill",
+    "stylers": [
+      {
+        "color": "#b9d3c2"
+      }
+    ]
+  },
+  {
+    "featureType": "water",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#92998d"
+      }
+    ]
+  },
+  {name: 'Styled Map'}
+]);
 </script>
 
-<script async defer
-        src="<?php echo e(URL::asset('js/maps.googleapis.js')); ?>?key=AIzaSyB3FxKEgf10vNGHSUUYms4rl8cusliiVgM&libraries=geometry,places">
-</script>
+
 
 <!--<script async defer
         src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB3FxKEgf10vNGHSUUYms4rl8cusliiVgM&libraries=geometry,places&callback=initApp">
