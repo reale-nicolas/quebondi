@@ -5,7 +5,14 @@ function getCorredorRamalAll(corredorName, ramalName)
         url: "http://comollego_ws.app/api/buseslines/all/"+corredorName+"/"+ramalName,
         type: 'GET',
         async: false,
-        contentType: "application/json",
-        dataType: 'jsonp'
+        dataType: "jsonp",
+        beforeSend: function(algo) {
+            $("#div-loading-corredor-"+corredorName+"-ramal-"+ramalName).toggleClass("w3-hide");
+            $("#input-checkbox-corredor-"+corredorName+"-ramal-"+ramalName).toggleClass("w3-hide");
+        },
+        complete: function(response) {
+            $("#div-loading-corredor-"+corredorName+"-ramal-"+ramalName).toggleClass("w3-hide");
+            $("#input-checkbox-corredor-"+corredorName+"-ramal-"+ramalName).toggleClass("w3-hide");
+        }
     });
 }

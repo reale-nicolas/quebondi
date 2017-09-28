@@ -52,15 +52,24 @@
             border: 16px solid #f3f3f3; /* Light grey */
             border-top: 16px solid #3498db; /* Blue */
             border-radius: 50%;
-            width: 120px;
-            height: 120px;
+            animation: spin 2s linear infinite;
+        }
+        
+        .loader-menu-option {
+            border: 3px solid #c1c0c0; /* Light grey */
+            border-top: 3px solid #3498db; /* Blue */
+            border-radius: 50%;
             animation: spin 2s linear infinite;
         }
 
         @keyframes  spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
-        }    
+        }
+        
+        #menuDivReference:hover{
+            animation: opac 0.8s;
+        }
     </style>
     <body onload="initializeApplication()">
 
@@ -96,40 +105,10 @@
                 
             </a>
             <div id="divRecorridosLineaList" class="w3-hide w3-animate-left">
-                <div class="w3-center w3-padding-16"><div class="loader" style="display: inline-block"></div></div>
-<!--                <a href="#" class="w3-bar-item w3-button"><i class="fa fa-bus w3-margin-right"></i>Corredor 1</a>
-                <div>
-                    <ul class="w3-ul w3-right" style="width:90%">
-                        <li class="w3-padding-16" style="cursor: pointer;" onclick="getLines()">
-                            <span class="w3-button w3-white w3-right" style="padding: 0px;">
-                                <input type="checkbox" onchange="getLines()"></input>
-                            </span>
-                            <img src="<?php echo e(URL::asset('images/1a.png')); ?>" class="w3-left w3-margin-right" style="width:30px">
-                            <span class="">Corredor 1A</span><br>
-                        </li>
-                        <li class="w3-padding-16">
-                            <span class="w3-button w3-white w3-right" style="padding: 0px;">
-                                <input type="checkbox"></input>
-                            </span>
-                            <img src="<?php echo e(URL::asset('images/1b.png')); ?>" class="w3-left w3-margin-right" style="width:30px">
-                            <span class="">Corredor 1B</span><br>
-                        </li>
-                        <li class="w3-padding-16">
-                            <span class="w3-button w3-white w3-right" style="padding: 0px;">
-                                <input type="checkbox"></input>
-                            </span>
-                            <img src="<?php echo e(URL::asset('images/1c.png')); ?>" class="w3-left w3-margin-right" style="width:30px">
-                            <span class="">Corredor 1C</span><br>
-                        </li>
-                    </ul>
-                </div>-->
-<!--                <a href="#" class="w3-bar-item w3-button"><i class="fa fa-bus w3-margin-right"></i>Corredor 2</a>
-                <a href="#" class="w3-bar-item w3-button"><i class="fa fa-bus w3-margin-right"></i>Corredor 3</a>
-                <a href="#" class="w3-bar-item w3-button"><i class="fa fa-bus w3-margin-right"></i>Corredor 4</a>
-                <a href="#" class="w3-bar-item w3-button"><i class="fa fa-bus w3-margin-right"></i>Corredor 5</a>
-                <a href="#" class="w3-bar-item w3-button"><i class="fa fa-bus w3-margin-right"></i>Corredor 6</a>
-                <a href="#" class="w3-bar-item w3-button"><i class="fa fa-bus w3-margin-right"></i>Corredor 7</a>
-                <a href="#" class="w3-bar-item w3-button"><i class="fa fa-bus w3-margin-right"></i>Corredor 8</a>-->
+                <div class="w3-center w3-padding-16">
+                    <div class="loader" style="display: inline-block; width: 120px; height: 120px;"></div>
+                        
+                </div>
             </div>
             
             
