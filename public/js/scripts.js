@@ -1,10 +1,10 @@
 var map;
+
 var arrMarker                   = [];
 var arrAutocomplete             = [];
 var arrInput                    = [];
 
-var arrCorredoresBusStopRoute   = [];
-var arrMarksAndPathBusStopRoute   = [];
+var arrCorredores               = [];
 
 var marker;
 var infowindow;
@@ -88,6 +88,41 @@ function initializeMap()
             displayMenuOptionOnMap(mouseEvent.latLng);
         });
     }
+    
+    
+    var menuDiv = document.createElement('div');
+    menuDiv.setAttribute("id","menuDivReference");
+    menuDiv.style.cssText =
+        'opacity:0.2; margin: 10px 10px; border-radius: 8px; height: 70px; width: 100px;' +
+        'background-color: white; font-size: 8px; font-family: Roboto;' +
+        'text-align: left; color: grey; overflow: hidden';
+
+    var titleDiv = document.createElement('div');
+    titleDiv.style.cssText =
+      'width: 100%; background-color: #337ab7; color: white; font-size: 12px;' +
+      'margin-bottom: 10px; padding-bottom:5px; padding-top:5px; text-align:center;';
+    titleDiv.innerText = 'Referencias';
+    
+    var pieceDiv = this.pieceDiv_ = document.createElement('div');
+    pieceDiv.innerText = '---------Imagen (ramales) ' ;
+    
+//    var resetDiv = document.createElement('div');
+//    resetDiv.innerText = 'Reset';
+//    resetDiv.style.cssText =
+//      'cursor: pointer; border-top: 1px solid lightgrey; margin-top: 8px;' +
+//      'color: #4275f4; line-height: 40px; font-weight: 800';
+      
+    menuDiv.appendChild(titleDiv);
+//    menuDiv.appendChild(pieceTitleDiv);
+    menuDiv.appendChild(pieceDiv);
+//    menuDiv.appendChild(timeTitleDiv);
+//    menuDiv.appendChild(timeDiv);
+//    menuDiv.appendChild(difficultyTitleDiv);
+//    menuDiv.appendChild(difficultySelect);
+//    menuDiv.appendChild(resetDiv);
+    map.controls[google.maps.ControlPosition.TOP_LEFT].push(menuDiv);
+    
+    
 }
     
     
@@ -151,50 +186,120 @@ function initializeMap()
     
     
     
-function selectRamalMenuItems(corredorName, ramalName)
+    
+
+function getRandomColor()
+{
+    var lum = 0;
+    var hex = Math.floor(Math.random()*16777215).toString(16);
+    // validate hex string
+    hex = String(hex).replace(/[^0-9a-f]/gi, '');
+    if (hex.length < 6) {
+        hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+    }
+    lum = lum || 0;
+
+    // convert to decimal and change luminosity
+    var rgb = "#", c, z;
+    for (z = 0; z < 3; z++) {
+        c = parseInt(hex.substr(z*2,2), 16);
+        c = Math.round(Math.min(Math.max(0, c + (c * lum)), 255)).toString(16);
+        rgb += ("00"+c).substr(c.length);
+    }
+    
+    return rgb;
+}
+
+
+function drawBusRoute(busInfo, color)
+{
+    var rutaBusCoordenadas = new Array(); 
+
+    for (var j = 0; j < busInfo.route.length; j++) 
+    {
+        rutaBusCoordenadas[j] = {lat: busInfo.route[j].latitud, lng: busInfo.route[j].longitud};
+    }
+    
+    var PolyLine = new google.maps.Polyline({
+        path: rutaBusCoordenadas,
+        map: map,
+        geodesic: true,
+        strokeColor: color,
+        strokeOpacity: 0.8,
+        strokeWeight: 5
+    });
+    
+    var arrMark = [];
+    for (var j = 0; j < busInfo.stops.length; j++) 
+    {
+        arrMark.push(new google.maps.Marker(
+        {
+            map: map,
+            position: {lat: busInfo.stops[j].latitud, lng: busInfo.stops[j].longitud},
+            icon: {
+                path: google.maps.SymbolPath.CIRCLE,
+                scale: 3, 
+                strokeColor: color,
+                strokeOpacity: 0.8,
+                strokeWeight: 5
+            }
+
+        }));
+    }
+    
+    return [PolyLine, arrMark];
+}
+
+
+function onSelectRamalMenuItems(corredorName, ramalName)
 {
     var checkbox = document.getElementById("li-corredor-"+corredorName+"-ramal-"+ramalName).getElementsByTagName('input')[0];
 
     if (checkbox.checked)
     {
         checkbox.checked = false;
-        
-        for (var i = 0; i < arrMarksAndPathBusStopRoute.length; i++)
+        for (var i = 0; i < arrCorredores.length; i++)
         {
-            if (arrMarksAndPathBusStopRoute[i][0] == corredorName && arrMarksAndPathBusStopRoute[i][1] == ramalName)
+            if (arrCorredores[i].number == corredorName && arrCorredores[i].letter == ramalName)
             {
                 //Ocultamos la ruta trazada para el corredor y ramal especificado.
-                arrMarksAndPathBusStopRoute[i][4].setMap(null);
-                
+                arrCorredores[i].mapRoute.setMap(null);
+
                 //Ocultamos las paradas para el corredor y ramal especificado.
-                for (var j = 0; j < arrMarksAndPathBusStopRoute[i][3].length; j++)
+                for (var j = 0; j < arrCorredores[i].mapMarkers.length; j++)
                 {
-                    arrMarksAndPathBusStopRoute[i][3][j].setMap(null);
+                    arrCorredores[i].mapMarkers[j].setMap(null);
                 }
             }
         }
-    }
-    else
-    {
+    } else {
         checkbox.checked = true;
+        var alreadyExist = false;
         
-        for (var i = 0; i < arrMarksAndPathBusStopRoute.length; i++)
+        for (var i = 0; i < arrCorredores.length; i++)
         {
-            if (arrMarksAndPathBusStopRoute[i][0] == corredorName && arrMarksAndPathBusStopRoute[i][1] == ramalName)
+            if (arrCorredores[i].number == corredorName && arrCorredores[i].letter == ramalName)
             {
-//                JSONPgetAllLinesByNumberAndLetterCallback (arrMarksAndPathBusStopRoute[i]);
-                drawBusStopsAndRoute(arrMarksAndPathBusStopRoute[i][0], arrMarksAndPathBusStopRoute[i][1], arrMarksAndPathBusStopRoute[i][2]);
-                return;
+                alreadyExist = true;
+                //Mostramos la ruta trazada para el corredor y ramal especificado.
+                arrCorredores[i].mapRoute.setMap(map);
+
+                //Mostramos las paradas para el corredor y ramal especificado.
+                for (var j = 0; j < arrCorredores[i].mapMarkers.length; j++)
+                {
+                    arrCorredores[i].mapMarkers[j].setMap(map);
+                }
             }
         }
         
-        var jsonRecorrido = JSON.parse(checkbox.getAttribute("stops"));
-        if (jsonRecorrido === null && typeof jsonRecorrido === 'object')
+        if (alreadyExist === false) 
         {
             getCorredorRamalAll(corredorName, ramalName);
         }
+        
+        checkbox.checked = true;
     }
-}    
+}
         
         
 function displayMenuOptionOnMap(latlng)

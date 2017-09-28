@@ -1,43 +1,5 @@
 <script>
 
-
-
-function drawBusRoute(busRoute)
-{
-    var rutaBusCoordenadas = new Array(); 
-
-    for (var j = 0; j < busRoute.length; j++) 
-    {
-        rutaBusCoordenadas[j] = {lat: busRoute[j].latitud, lng: busRoute[j].longitud};
-    }
-
-    return new google.maps.Polyline({
-        path: rutaBusCoordenadas,
-        map: map,
-        geodesic: true,
-        strokeColor: '#'+Math.floor(Math.random()*16777215).toString(16),
-        strokeOpacity: 1.0,
-        strokeWeight: 2
-    });
-}
-
-
-function drawBusStops(busStop)
-{
-    var markers = [];
-    for (var j = 0; j < busStop.length; j++) 
-    {
-        markers.push(
-            new google.maps.Marker(
-            {
-                map: map,
-                position: {lat: busStop[j].latitud, lng: busStop[j].longitud}
-            })
-        );
-    }
-    return markers;
-}
-
 function drawBusStopsAndRoute(number, letter, zone)
 {
     for( var i = 0; i < arrMarksAndPathBusStopRoute.length; i++)
@@ -58,9 +20,8 @@ function drawBusStopsAndRoute(number, letter, zone)
 
 
 
-function cargarOpcionesMenuRecorridosXLinea(jsonResult)
+    function cargarOpcionesMenuRecorridosXLinea(jsonResult)
     {
-//        console.log(jsonResult);
         
         var lines = new Array();
 
@@ -81,14 +42,9 @@ function cargarOpcionesMenuRecorridosXLinea(jsonResult)
         
         for (var index in lines) 
         {
-//            console.log("Element: "+lines[index]+" - Index: "+index);
-            
             var arrCorredor     = index.split(",");
             var corredorName    = arrCorredor[0];
             var ramalName       = arrCorredor[1];
-//            var corredorName = corredor.name;
-            
-//            console.log( corredorName+ramalName);
 
             var aElement = document.getElementById("a-corredor-"+corredorName);
             
@@ -137,7 +93,7 @@ function cargarOpcionesMenuRecorridosXLinea(jsonResult)
                 liElement.setAttribute("id","li-corredor-"+corredorName+"-ramal-"+ramalName);
                 liElement.setAttribute("class","w3-padding-16");
                 liElement.setAttribute("style","cursor:pointer;");
-                liElement.setAttribute("onclick","selectRamalMenuItems('"+corredorName+"','"+ramalName+"')");
+                liElement.setAttribute("onclick","onSelectRamalMenuItems('"+corredorName+"','"+ramalName+"')");
                 liElement.onmouseover = function(){this.style.backgroundColor = "#d3f9ec";};
                 liElement.onmouseout  = function(){this.style.backgroundColor = "#ffffff";};
                 var spanElement     = document.createElement("span");
@@ -145,199 +101,46 @@ function cargarOpcionesMenuRecorridosXLinea(jsonResult)
                 spanElement.setAttribute("style", "padding: 0px;height: 20px;");
             
             
+                var divLoadingElement    = document.createElement("div");
+                divLoadingElement.setAttribute("id", "div-loading-corredor-"+corredorName+"-ramal-"+ramalName);
+                divLoadingElement.setAttribute("class", "loader-menu-option w3-hide"); 
+                divLoadingElement.setAttribute("style","width:20px;height:20px;");
+                
                 var inputElement    = document.createElement("input");
                 inputElement.setAttribute("type", "checkbox");
+                inputElement.setAttribute("id", "input-checkbox-corredor-"+corredorName+"-ramal-"+ramalName);
                 inputElement.setAttribute("class", "w3-check");
                 inputElement.setAttribute("style","cursor:pointer;margin:0px;top:0px;width:20px;height:20px;");
-                
-                
-//                var recorridoStr = '{"lines":[';
-//                var esPrimero = true;
-//                for (var k = 0; k < ramal.stop.length; k++) 
-//                {
-//                    if (!esPrimero)
-//                        recorridoStr += ', ';
-//                    recorridoStr += '{"latitud":'+ramal.stop[k].latitud+', "longitud":'+ramal.stop[k].longitud+'}';
-//                    esPrimero = false;
-//                }
-//                recorridoStr += ']}';
-////var recorridoStr = '{"lines":"1"}';
-//                inputElement.setAttribute("stops",recorridoStr);
-                
-                
-                var imgElement      = document.createElement("img");
-                imgElement.setAttribute("class","w3-left w3-margin-right");
-                imgElement.setAttribute("style","width:30px");
-                imgElement.setAttribute("src","{{ URL::asset('images/') }}/"+corredorName+ramalName+".png");
-                var span1Element    = document.createElement("span");
-                span1Element.innerHTML = "Ramal "+ramalName;
-                
-            
-                spanElement.appendChild(inputElement);
-                liElement.appendChild(spanElement);
-                liElement.appendChild(imgElement);
-                liElement.appendChild(span1Element);
-                
-                ulElement.appendChild(liElement);
-            
-            
-            
-            
-            
-            divElement.appendChild(ulElement);
-            divElementMenuContent.appendChild(divElement);
-        }
-        
-    } 
-    
-    
-    
-    
-    function cargarOpcionesMenuRecorridosXLinea123Back(jsonResult)
-    {
-        console.log(jsonResult);
-        
-        var lines = new Array();
-        
-        for (var i = 0; i < jsonResult.length; i++) 
-        {
-            var corredor = jsonResult[i];
-          
-            if (!Array.isArray(lines[[corredor.number, corredor.letter]]))
-                lines[[corredor.number, corredor.letter]] = new Array();
-            lines[[corredor.number, corredor.letter]].push(corredor.zone);
- 
-        }
-        console.log(lines);
-        
-        var divElementMenuContent = document.getElementById("divRecorridosLineaList");
-        divElementMenuContent.innerHTML = '';
-            
-        for (var i = 0; i < jsonResult.length; i++) 
-        {
-            var corredor = jsonResult[i];
-            var corredorName = corredor.name;
-            
-            console.log("Corredor: "+corredorName + corredor );
-            
-            var aElement = document.createElement("a");
-            aElement.setAttribute("id", "a-corredor-"+corredorName);
-            aElement.setAttribute("href", "#");
-            aElement.setAttribute("class","w3-bar-item w3-button");
-            aElement.setAttribute("onclick","$('#div-corredor-"+corredorName+"').toggleClass('w3-hide');");
-            
-            var iElement = document.createElement("i");
-            iElement.setAttribute("class","fa fa-bus w3-margin-right");
-            
-            var spanElement = document.createElement("span");
-            spanElement.innerHTML = "Línea "+corredorName;
-            
-            aElement.appendChild(iElement);
-            aElement.appendChild(spanElement);
-            
-            divElementMenuContent.appendChild(aElement);
-            
-            var divElement = document.createElement("div");
-            divElement.setAttribute("id", "div-corredor-"+corredorName);
-            divElement.setAttribute("class", "w3-hide");
-            
-            var ulElement = document.createElement("ul");
-            ulElement.setAttribute("class", "w3-ul w3-right");
-            ulElement.setAttribute("style", "width:90%");
-                
-            for (var j = 0; j < corredor.ramals.length; j++) 
-            {
-                var ramal = corredor.ramals[j];
-                var ramalName       = ramal.name;
-                
-                var liElement       = document.createElement("li");
-                liElement.setAttribute("id","li-corredor-"+corredorName+"-ramal-"+ramalName);
-                liElement.setAttribute("class","w3-padding-16");
-                liElement.setAttribute("style","cursor:pointer;");
-                liElement.setAttribute("onclick","selectRamalMenuItems('"+corredorName+"','"+ramalName+"')");
-                liElement.onmouseover = function(){this.style.backgroundColor = "#d3f9ec";};
-                liElement.onmouseout  = function(){this.style.backgroundColor = "#ffffff";};
-                var spanElement     = document.createElement("span");
-                spanElement.setAttribute("class","w3-button w3-white w3-right");
-                spanElement.setAttribute("style", "padding: 0px;height: 20px;");
-                var inputElement    = document.createElement("input");
-                inputElement.setAttribute("type", "checkbox");
-                inputElement.setAttribute("class", "w3-check");
-                inputElement.setAttribute("style","cursor:pointer;margin:0px;top:0px;width:20px;height:20px;");
-                
-                var recorridoStr = '{"lines":[';
-                var esPrimero = true;
-                for (var k = 0; k < ramal.stop.length; k++) 
-                {
-                    if (!esPrimero)
-                        recorridoStr += ', ';
-                    recorridoStr += '{"latitud":'+ramal.stop[k].latitud+', "longitud":'+ramal.stop[k].longitud+'}';
-                    esPrimero = false;
-                }
-                recorridoStr += ']}';
-//var recorridoStr = '{"lines":"1"}';
-                inputElement.setAttribute("stops",recorridoStr);
-                
-                var imgElement      = document.createElement("img");
-                imgElement.setAttribute("class","w3-left w3-margin-right");
-                imgElement.setAttribute("style","width:30px");
-                imgElement.setAttribute("src","{{ URL::asset('images/') }}/"+corredorName+ramalName+".png");
-                var span1Element    = document.createElement("span");
-                span1Element.innerHTML = "Ramal "+ramalName;
-             
-                spanElement.appendChild(inputElement);
-                liElement.appendChild(spanElement);
-                liElement.appendChild(imgElement);
-                liElement.appendChild(span1Element);
-                
-                ulElement.appendChild(liElement);
-            }
-            divElement.appendChild(ulElement);
-            divElementMenuContent.appendChild(divElement);
-        }
-        /*
-        <a href="#" class="w3-bar-item w3-button"><i class="fa fa-bus w3-margin-right"></i>Corredor 1</a>
-        <div>
-            <ul class="w3-ul w3-right" style="width:90%">
-                <li class="w3-padding-16">
-                    <span class="w3-button w3-white w3-right" style="padding: 0px;">
-                        <input type="checkbox" onchange="getLines()"></input>
-                    </span>
-                    <img src="{{ URL::asset('images/saeta_1a.png') }}" class="w3-left w3-margin-right" style="width:30px">
-                    <span class="">Corredor 1A</span><br>
-                </li>
-                <li class="w3-padding-16">
-                    <span class="w3-button w3-white w3-right" style="padding: 0px;">
-                        <input type="checkbox"></input>
-                    </span>
-                    <img src="{{ URL::asset('images/saeta_1b.png') }}" class="w3-left w3-margin-right" style="width:30px">
-                    <span class="">Corredor 1B</span><br>
-                </li>
-                <li class="w3-padding-16">
-                    <span class="w3-button w3-white w3-right" style="padding: 0px;">
-                        <input type="checkbox"></input>
-                    </span>
-                    <img src="{{ URL::asset('images/saeta_1c.png') }}" class="w3-left w3-margin-right" style="width:30px">
-                    <span class="">Corredor 1C</span><br>
-                </li>
-            </ul>
-        </div>
-        */
-        
-        //cajadatos.innerHTML=e.target.responseText; 
-    } 
-    
-
-
-
-
-        
-        
-//        console.log(jsonRecorrido);
-//        
-//        drawBusesStops(jsonRecorrido.lines);
-
+                inputElement.setAttribute("onclick","onSelectRamalMenuItems('"+corredorName+"','"+ramalName+"')");
    
+                
+                var imgElement      = document.createElement("img");
+                imgElement.setAttribute("class","w3-left w3-margin-right");
+                imgElement.setAttribute("style","width:30px");
+                imgElement.setAttribute("src","{{ URL::asset('images/') }}/"+corredorName+ramalName+".png");
+                var span1Element    = document.createElement("span");
+                span1Element.innerHTML = "Ramal "+ramalName;
+                
+            
+                spanElement.appendChild(divLoadingElement);
+                spanElement.appendChild(inputElement);
+                liElement.appendChild(spanElement);
+                liElement.appendChild(imgElement);
+                liElement.appendChild(span1Element);
+                
+                ulElement.appendChild(liElement);
+            
+            
+            
+            
+            
+            divElement.appendChild(ulElement);
+            divElementMenuContent.appendChild(divElement);
+        }
+        
+    } 
+    
+    
     
     
     function addMarker(place)
