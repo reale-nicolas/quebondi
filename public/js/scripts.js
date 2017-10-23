@@ -57,13 +57,13 @@ function initializeMap()
         streetViewControl: false,
         mapTypeControl: false,
         mapTypeControlOptions: {
-            mapTypeIds: ['styled_map']
+//            mapTypeIds: ['styled_map']
         }
     });
 
     //Associate the styled map with the MapTypeId and set it to display.
-    map.mapTypes.set('styled_map', styledMapType);
-    map.setMapTypeId('styled_map');
+//    map.mapTypes.set('styled_map', styledMapType);
+//    map.setMapTypeId('styled_map');
     
     infowindow = new google.maps.InfoWindow();
     marker = new google.maps.Marker(
