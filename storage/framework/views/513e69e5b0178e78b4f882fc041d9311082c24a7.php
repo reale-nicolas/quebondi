@@ -61,6 +61,6 @@
     </div>
     <br/>
     <div class="form-group text-right">
-        <button class="btn btn-primary btn-lg" tabindex="4">Calcular</button>
+        <button id="btnCalcularRutaOptima" class="btn btn-primary btn-lg" tabindex="4">Calcular</button>
     </div>
 </form>

@@ -186,6 +186,32 @@
 //            $.ajaxSetup({
 //                headers: {'X-CSRF-Token': tokenValue}
 //            });
+
+            $("#btnCalcularRutaOptima").on("click", function() {
+                var latDesde = $("#origen-latitud").val();
+                var lngDesde = $("#origen-longitud").val();
+                var latHasta = $("#destino-latitud").val();
+                var lngHasta = $("#destino-longitud").val();
+                
+                var distancia = $("#distancia-input").val();
+                
+                $.ajax(
+                {
+                    url: "http://localhost/comollego/?a="+latDesde+"&b="+lngDesde+"&c="+latHasta+"&d="+lngHasta,
+                    type: 'GET',
+                    async: false,
+                    dataType: "jsonp xml",
+                    complete: function(response) {
+                        console.log("response");
+                        console.log(response);
+                        console.log("------------");
+                        $(response).find("alternativa").each(function()
+                        {
+                            alert("a");
+                        });
+                    }
+                });
+            });
         });
 
 
